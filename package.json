@@ -1,0 +1,22 @@
+{
+  "name": "gh-installer",
+  "version": "0.0.1",
+  "description": "install dependencies from github",
+  "keywords": [],
+  "author": "matthew mueller <mattmuelle@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/matthewmueller/gh-installer.git"
+  },
+  "dependencies": {
+    "batch": "~0.5.0",
+    "gh-package": "0.0.1",
+    "co-parallel": "0.0.1"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*",
+    "co": "~3.0.4"
+  },
+  "main": "index"
+}
