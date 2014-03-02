@@ -10,8 +10,9 @@
   },
   "dependencies": {
     "batch": "~0.5.0",
-    "gh-package": "0.0.1",
-    "co-parallel": "0.0.1"
+    "gh-package": "0.0.3",
+    "co-parallel": "0.0.1",
+    "co-fs": "~1.1.1"
   },
   "devDependencies": {
     "mocha": "*",

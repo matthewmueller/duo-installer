@@ -15,5 +15,6 @@ var installer = Installer(__dirname + '/example-app')
   .directory('/components')
 
 co(installer.install).call(installer, function(err) {
+  if (err) throw err;
   console.log(err);
 });
