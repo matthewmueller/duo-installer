@@ -4,6 +4,7 @@
   "dependencies": {
     "matthewmueller/uid": "0.0.x",
     "component/infinity": "0.0.5",
-    "component/events": "1.0.4"
+    "component/events": "1.0.4",
+    "matthewmueller/spreadsheet": "master"
   }
 }
