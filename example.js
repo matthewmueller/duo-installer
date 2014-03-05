@@ -12,7 +12,7 @@ assert(process.env.token, 'no process.env.token');
 var installer = Installer(__dirname + '/example-app')
   .auth(process.env.user, process.env.token)
   .manifest('component.json')
-  .directory('/components')
+  .directory('./components')
 
 co(installer.install).call(installer, function(err) {
   if (err) throw err;
