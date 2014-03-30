@@ -1,16 +1,16 @@
 {
-  "name": "gh-installer",
+  "name": "duo-installer",
   "version": "0.0.1",
   "description": "install dependencies from github",
   "keywords": [],
   "author": "matthew mueller <mattmuelle@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git://github.com/matthewmueller/gh-installer.git"
+    "url": "git://github.com/duojs/duo-installer.git"
   },
   "dependencies": {
     "batch": "~0.5.0",
-    "gh-package": "0.0.3",
+    "duo-package": "~0.0.6",
     "co-parallel": "0.0.1",
     "co-fs": "~1.1.1"
   },

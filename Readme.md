@@ -1,9 +1,9 @@
 
-# gh-installer
+# duo installer
 
-  install dependencies from github
+  install dependencies from github. built for [duo](http://github.com/duojs/duo), but can be used on it's own.
 
-## License 
+## License
 
 (The MIT License)
 
