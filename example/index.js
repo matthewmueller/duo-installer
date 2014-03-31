@@ -13,7 +13,9 @@ var installer = Installer(__dirname)
   .auth(process.env.user, process.env.token)
   .directory('components')
 
-co(installer.install).call(installer, function(err) {
+installer.install = co(installer.install)
+
+installer.install(function(err) {
   if (err) throw err;
-  console.log(err);
+  console.log('all done!');
 });

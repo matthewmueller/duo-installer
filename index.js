@@ -2,11 +2,13 @@
  * Module dependencies
  */
 
+var debug = require('debug')('duo-installer');
 var path = require('path');
 var join = path.join;
 var normalize = path.normalize;
 var Package = require('duo-package');
 var parallel = require('co-parallel');
+var reject = require('co-reject');
 var fs = require('co-fs');
 
 /**
@@ -123,11 +125,17 @@ Installer.prototype.development = function(dev) {
 Installer.prototype.install = function *() {
   var pkgs = yield this.dependencies(this.local, '.');
 
+  // debug "fetching"
+  pkgs.map(this.debug('fetching: %s', 'slug'));
+
   // fetch the `pkg`'s content
   yield this.parallel(pkgs.map(fetch));
 
+  // debug "fetched"
+  pkgs.map(this.debug('fetched: %s', 'slug'));
+
   // write the mappings
-  yield fs.writeFile(join(this._directory, 'mapping.json'), JSON.stringify(this._mappings, true, 2), 'utf8');
+  yield fs.writeFile(join(this._directory, 'mapping.json'), JSON.stringify(this._mappings, true, 2));
 
   return this;
 
@@ -148,6 +156,7 @@ Installer.prototype.install = function *() {
 Installer.prototype.dependencies = function *(json, parent, out) {
   var self = this;
   var deps = json.dependencies || {};
+  var directory = this._directory;
   var out = out || {};
   var pkgs = [];
   var gens;
@@ -155,25 +164,35 @@ Installer.prototype.dependencies = function *(json, parent, out) {
   // create packages from deps
   for (var dep in deps) {
     var pkg = new Package(dep, deps[dep]);
-    pkg.directory(this._directory);
+    pkg.directory(directory);
     pkgs.push(pkg);
   }
+
+  // debug "resolving"
+  pkgs.map(this.debug('resolving: %s', 'slug'));
 
   // resolve the versions of all `deps`
   yield this.parallel(pkgs.map(version));
 
+  // debug "resolved"
+  pkgs.map(this.debug('resolved to: %s', 'slug'));
+
   // set the mappings
   this._mappings[parent] = pkgs.map(slug);
 
-  // filter out pkgs we already read
-  pkgs = pkgs.filter(cached);
+  // reject `pkgs` we already installed
+  pkgs = yield reject(pkgs, exists);
 
-  // read the manifests of `deps` and recurse
+  // filter out `pkgs` we already resolved
+  pkgs = pkgs.filter(resolved);
+
+  // read the manifests of `pkgs`
   var manifests = yield this.parallel(pkgs.map(read));
 
   // recurse in parallel
   yield this.parallel(pkgs.map(recurse));
 
+  // return an array of packages to fetch
   return values(out);
 
   // get the versions
@@ -186,8 +205,14 @@ Installer.prototype.dependencies = function *(json, parent, out) {
     return self.resolve(pkg.slug());
   }
 
+  function exists(pkg) {
+    var slug = pkg.slug();
+    var path = join(directory, slug);
+    return fs.exists(path);
+  }
+
   // filter and cache
-  function cached(pkg) {
+  function resolved(pkg) {
     var cont = !out[pkg.slug()];
     out[pkg.slug()] = pkg;
     return cont;
@@ -257,3 +282,18 @@ Installer.prototype.json = function(path) {
     return {};
   }
 };
+
+/**
+ * Debug over map
+ *
+ * @param {String} str
+ * @param {String} val
+ * @return {Function}
+ * @api private
+ */
+
+Installer.prototype.debug = function(str, val) {
+  return function (pkg) {
+    debug(str, pkg[val]());
+  };
+}
