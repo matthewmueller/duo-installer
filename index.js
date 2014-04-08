@@ -8,7 +8,6 @@ var join = path.join;
 var normalize = path.normalize;
 var Package = require('duo-package');
 var parallel = require('co-parallel');
-var reject = require('co-reject');
 var fs = require('co-fs');
 
 /**
@@ -123,6 +122,7 @@ Installer.prototype.development = function(dev) {
  */
 
 Installer.prototype.install = function *() {
+  // resolve all the dependencies starting at our root component.json
   var pkgs = yield this.dependencies(this.local, '.');
 
   // debug "fetching"
@@ -135,7 +135,8 @@ Installer.prototype.install = function *() {
   pkgs.map(this.debug('fetched: %s', 'slug'));
 
   // write the mappings
-  yield fs.writeFile(join(this._directory, 'mapping.json'), JSON.stringify(this._mappings, true, 2));
+  var mappings = JSON.stringify(this._mappings, true, 2);
+  yield fs.writeFile(join(this._directory, 'mapping.json'), mappings);
 
   return this;
 
@@ -180,9 +181,6 @@ Installer.prototype.dependencies = function *(json, parent, out) {
   // set the mappings
   this._mappings[parent] = pkgs.map(slug);
 
-  // reject `pkgs` we already installed
-  pkgs = yield reject(pkgs, exists);
-
   // filter out `pkgs` we already resolved
   pkgs = pkgs.filter(resolved);
 
@@ -202,7 +200,7 @@ Installer.prototype.dependencies = function *(json, parent, out) {
 
   // fetch the slug
   function slug(pkg) {
-    return self.resolve(pkg.slug());
+    return pkg.slug();
   }
 
   function exists(pkg) {
@@ -227,7 +225,7 @@ Installer.prototype.dependencies = function *(json, parent, out) {
   function recurse(pkg, i) {
     var manifest = manifests[i];
     var json = JSON.parse(manifest);
-    var gens =  self.dependencies(json, self.resolve(pkg.slug()), out);
+    var gens =  self.dependencies(json, pkg.slug(), out);
     return gens;
   }
 
@@ -251,7 +249,7 @@ Installer.prototype.resolve = function(slug) {
   var manifest = join(this._directory, slug, this._manifest);
   var json = this.json(manifest);
   var main = json.main || 'index.js';
-  return join(this.depdir, slug, main);
+  return join(this._directory, slug, main);
 };
 
 /**
