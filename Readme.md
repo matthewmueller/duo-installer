@@ -3,6 +3,29 @@
 
   install dependencies from github. built for [duo](http://github.com/duojs/duo), but can be used on it's own.
 
+## Example
+
+```js
+var co = require('co');
+var assert = require('assert');
+var Installer = require('../');
+
+assert(process.env.user, 'no process.env.user');
+assert(process.env.token, 'no process.env.token');
+
+var installer = Installer(__dirname)
+  .auth(process.env.user, process.env.token)
+  .directory('components')
+
+// wrap so we make it consumeable outside of a generator
+installer.install = co(installer.install)
+
+installer.install(function(err) {
+  if (err) throw err;
+  console.log('all done!');
+});
+```
+
 ## License
 
 (The MIT License)
