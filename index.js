@@ -1,8 +1,10 @@
+
 /**
  * Module dependencies
  */
 
 var debug = require('debug')('duo-installer');
+var Emitter = require('events').EventEmitter;
 var path = require('path');
 var join = path.join;
 var normalize = path.normalize;
@@ -41,7 +43,14 @@ function Installer(cwd) {
   this._concurrency = 10;
   this._development = false;
   this._mappings = {};
+  Emitter.call(this);
 }
+
+/**
+ * Emitter
+ */
+
+Installer.prototype.__proto__ = Emitter.prototype;
 
 /**
  * Authenticate with github
@@ -123,6 +132,7 @@ Installer.prototype.development = function(dev) {
 
 Installer.prototype.install = function *() {
   // resolve all the dependencies starting at our root component.json
+  var self = this;
   var pkgs = yield this.dependencies(this.local, '.');
 
   // debug "fetching"
@@ -140,8 +150,17 @@ Installer.prototype.install = function *() {
 
   return this;
 
+  // emit
+  function emit(event, pkg){
+    return function(){
+      self.emit(event, pkg);
+    };
+  }
+
   // fetch the package
   function fetch(pkg) {
+    pkg.on('fetching', emit('install', pkg));
+    pkg.on('fetch', emit('installed', pkg));
     return pkg.fetch();
   }
 };
