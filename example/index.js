@@ -1,3 +1,4 @@
+
 /**
  * Module Dependencies
  */
@@ -11,6 +12,7 @@ assert(process.env.token, 'no process.env.token');
 
 var installer = Installer(__dirname)
   .auth(process.env.user, process.env.token)
+  .development('true' == process.env.DEV)
   .on('install', log('install'))
   .on('installed', log('installed'))
   .directory('components');

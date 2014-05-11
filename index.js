@@ -174,12 +174,18 @@ Installer.prototype.install = function *() {
  */
 
 Installer.prototype.dependencies = function *(json, parent, out) {
-  var self = this;
+  var root = null == out;
   var deps = json.dependencies || {};
+  var self = this;
   var directory = this._directory;
   var out = out || {};
   var pkgs = [];
   var gens;
+
+  // include development deps only for the root component
+  if (root && this._development) {
+    deps = merge(deps, json.development || {});
+  }
 
   // create packages from deps
   for (var dep in deps) {
@@ -313,4 +319,21 @@ Installer.prototype.debug = function(str, val) {
   return function (pkg) {
     debug(str, pkg[val]());
   };
+}
+
+/**
+ * Merge the given `objs` ..
+ * 
+ * @param {Object} ...
+ * @return {Object}
+ * @api private
+ */
+
+function merge(){
+  var args = [].slice.call(arguments);
+  return args.reduce(function(ret, obj){
+    if (!obj) return ret;
+    for (var k in obj) ret[k] = obj[k];
+    return ret;
+  }, {});
 }
