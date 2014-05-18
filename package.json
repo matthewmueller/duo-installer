@@ -13,7 +13,7 @@
     "co-fs": "~1.1.1",
     "co-parallel": "0.0.1",
     "debug": "^0.8.0",
-    "duo-package": "~0.0.10"
+    "duo-package": "git+ssh://git@github.com:component/duo-package.git"
   },
   "devDependencies": {
     "mocha": "*",
