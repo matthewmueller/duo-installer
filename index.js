@@ -133,7 +133,8 @@ Installer.prototype.development = function(dev) {
 Installer.prototype.install = function *() {
   // resolve all the dependencies starting at our root component.json
   var self = this;
-  var pkgs = yield this.dependencies(this.local, '.');
+  var name = slug(this.local);
+  var pkgs = yield this.dependencies(this.local, name);
 
   // debug "fetching"
   pkgs.map(this.debug('fetching: %s', 'slug'));
@@ -174,7 +175,7 @@ Installer.prototype.install = function *() {
  */
 
 Installer.prototype.dependencies = function *(json, parent, out) {
-  var root = null == out;
+  var root = json == this.local;
   var deps = json.dependencies || {};
   var self = this;
   var directory = this._directory;
@@ -204,7 +205,11 @@ Installer.prototype.dependencies = function *(json, parent, out) {
   pkgs.map(this.debug('resolved to: %s', 'slug'));
 
   // set the mappings
-  this._mappings[parent] = pkgs.map(slug);
+  this._mappings[parent] = {
+    root: root,
+    main: main(json),
+    deps: pkgs.map(slug)
+  };
 
   // filter out `pkgs` we already resolved
   pkgs = pkgs.filter(resolved);
@@ -336,4 +341,35 @@ function merge(){
     for (var k in obj) ret[k] = obj[k];
     return ret;
   }, {});
+}
+
+/**
+ * Get `main`.
+ * 
+ * TODO: this sucks, but some modules don't specify main.
+ * 
+ * @param {Object} json
+ * @return {String}
+ * @api private
+ */
+
+function main(json){
+  return json.main
+    || (json.scripts && json.scripts[0])
+    || 'index.js';
+}
+
+/**
+ * Slug.
+ * 
+ * @param {Object} json
+ * @return {String}
+ * @api private
+ */
+
+function slug(json){
+  return [
+    json.repo || json.name,
+    json.version || ''
+  ].join('@');
 }
