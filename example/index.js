@@ -15,6 +15,7 @@ var installer = Installer(__dirname)
   .development('true' == process.env.DEV)
   .on('install', log('install'))
   .on('installed', log('installed'))
+  .concurrency(Infinity)
   .directory('components');
 
 installer.install = co(installer.install)
