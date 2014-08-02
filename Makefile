@@ -1,7 +1,9 @@
+BIN := ./node_modules/.bin
 
-test:
-	@./node_modules/.bin/mocha \
-		--require should \
-		--reporter spec
+node_modules: package.json
+	@npm install
+
+test: node_modules
+	@$(BIN)/gnode $(BIN)/_mocha
 
 .PHONY: test
