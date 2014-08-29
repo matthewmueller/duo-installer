@@ -2,6 +2,8 @@
 # duo installer
 
   install dependencies from github. built for [duo](http://github.com/duojs/duo), but can be used on it's own.
+  
+  **Deprecated**
 
 ## Example
 
